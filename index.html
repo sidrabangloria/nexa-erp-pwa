@@ -1,857 +1,108 @@
 <!DOCTYPE html>
-<html lang="en">
+<html ng-app="nexaERP">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NexaCorp ERP Portal</title>
-
-  <!-- PWA Meta Tags -->
-  <meta name="description" content="NexaCorp ERP Portal - Angular Progressive Web Application">
-  <meta name="theme-color" content="#0a0e1a">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="NexaCorp ERP">
-
-  <!-- PWA Manifest -->
-  <link rel="manifest" href="manifest.json">
-
-  <!-- Bootstrap 4.5 (matches professor's template) -->
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
-
-  <!-- Chart.js via CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <!-- PapaParse via CDN (professor's required library) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
-
-  <style>
-    /* ── CSS Custom Properties (Design Tokens) ── */
-    :root {
-      --bg:       #0a0e1a;
-      --surface:  #111827;
-      --surface2: #1a2235;
-      --border:   #1e2d45;
-      --accent:   #00d4ff;
-      --accent2:  #7c3aed;
-      --accent3:  #10b981;
-      --warn:     #f59e0b;
-      --danger:   #ef4444;
-      --text:     #e2e8f0;
-      --muted:    #64748b;
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'IBM Plex Sans', sans-serif;
-      min-height: 100vh;
-      margin: 0;
-    }
-
-    /* ── Topbar / Navbar ── */
-    .topbar {
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      padding: .75rem 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-    .topbar .brand {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 1.1rem;
-      color: var(--accent);
-      letter-spacing: .1em;
-      text-decoration: none;
-      cursor: pointer;
-    }
-    .topbar .brand span { color: var(--text); }
-    .topbar-right {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .72rem;
-      color: var(--muted);
-    }
-    .topbar-right strong { color: var(--accent3); }
-
-    /* ── Layout ── */
-    .portal-layout {
-      display: flex;
-      min-height: calc(100vh - 57px);
-    }
-
-    /* ── Sidenav ── */
-    .sidenav {
-      width: 220px;
-      background: var(--surface);
-      border-right: 1px solid var(--border);
-      padding: 1.5rem 0;
-      flex-shrink: 0;
-    }
-    .sidenav .nav-section {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .65rem;
-      letter-spacing: .15em;
-      color: var(--muted);
-      text-transform: uppercase;
-      padding: .5rem 1.5rem;
-      margin-top: .75rem;
-    }
-    .sidenav a {
-      display: flex;
-      align-items: center;
-      gap: .6rem;
-      padding: .6rem 1.5rem;
-      font-size: .85rem;
-      color: var(--muted);
-      text-decoration: none;
-      border-left: 3px solid transparent;
-      transition: .15s;
-      cursor: pointer;
-    }
-    .sidenav a:hover { color: var(--text); background: var(--surface2); }
-    .sidenav a.active {
-      color: var(--accent);
-      border-left-color: var(--accent);
-      background: rgba(0,212,255,.06);
-    }
-
-    /* ── Main content ── */
-    .main-content { flex: 1; padding: 2rem; overflow-x: hidden; }
-
-    /* ── Page header ── */
-    .page-header {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      margin-bottom: 2rem;
-      padding-bottom: 1.25rem;
-      border-bottom: 1px solid var(--border);
-    }
-    .page-header h1 {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 1.4rem;
-      color: var(--accent);
-      letter-spacing: .05em;
-      margin: 0;
-    }
-    .page-header p { color: var(--muted); font-size: .83rem; margin: .25rem 0 0; }
-    .page-badge {
-      background: rgba(0,212,255,.1);
-      border: 1px solid rgba(0,212,255,.3);
-      color: var(--accent);
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .7rem;
-      padding: .25rem .75rem;
-      letter-spacing: .08em;
-      white-space: nowrap;
-    }
-
-    /* ── KPI Cards ── */
-    .kpi-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      padding: 1.25rem 1.5rem;
-      position: relative;
-      overflow: hidden;
-      margin-bottom: 1.5rem;
-    }
-    .kpi-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0;
-      width: 3px; height: 100%;
-      background: var(--accent);
-    }
-    .kpi-card.green::before  { background: var(--accent3); }
-    .kpi-card.purple::before { background: var(--accent2); }
-    .kpi-card.warn::before   { background: var(--warn); }
-
-    .kpi-label {
-      font-size: .72rem;
-      color: var(--muted);
-      letter-spacing: .1em;
-      text-transform: uppercase;
-      font-family: 'IBM Plex Mono', monospace;
-    }
-    .kpi-value {
-      font-size: 1.8rem;
-      font-weight: 700;
-      color: var(--text);
-      margin: .3rem 0 .2rem;
-      font-family: 'IBM Plex Mono', monospace;
-    }
-    .kpi-delta { font-size: .78rem; }
-    .kpi-delta.up   { color: var(--accent3); }
-    .kpi-delta.down { color: var(--danger); }
-
-    /* ── Chart Cards ── */
-    .chart-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      padding: 1.25rem;
-      margin-bottom: 1.5rem;
-    }
-    .chart-card-title {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .82rem;
-      color: var(--muted);
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      margin-bottom: 1rem;
-      display: flex;
-      align-items: center;
-      gap: .5rem;
-    }
-    .chart-card-title::before { content: '▸'; color: var(--accent); }
-
-    /* ── Portal Hero ── */
-    .portal-hero {
-      background: linear-gradient(135deg, var(--surface) 0%, #0d1b2e 100%);
-      border: 1px solid var(--border);
-      padding: 3rem 2.5rem;
-      margin-bottom: 2rem;
-      position: relative;
-      overflow: hidden;
-    }
-    .portal-hero::after {
-      content: 'ERP';
-      position: absolute;
-      right: -1rem; bottom: -2rem;
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 8rem;
-      font-weight: 700;
-      color: rgba(0,212,255,.04);
-      line-height: 1;
-    }
-    .portal-hero h2 {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 2rem;
-      color: var(--accent);
-      margin-bottom: .5rem;
-    }
-    .portal-hero p {
-      color: var(--muted);
-      font-size: .92rem;
-      max-width: 600px;
-      line-height: 1.7;
-      margin: 0;
-    }
-
-    /* ── Module Cards (portal home) ── */
-    .module-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      padding: 1.5rem;
-      text-decoration: none;
-      display: block;
-      transition: .2s;
-      position: relative;
-      overflow: hidden;
-      cursor: pointer;
-      height: 100%;
-    }
-    .module-card:hover {
-      border-color: var(--accent);
-      background: var(--surface2);
-      text-decoration: none;
-    }
-    .module-card.locked { opacity: .4; cursor: not-allowed; }
-    .module-card .mod-icon { font-size: 2rem; margin-bottom: .75rem; }
-    .module-card .mod-name {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .95rem;
-      color: var(--accent);
-      margin-bottom: .3rem;
-    }
-    .module-card .mod-desc { font-size: .8rem; color: var(--muted); line-height: 1.5; }
-    .module-card .mod-arrow {
-      position: absolute;
-      top: 1rem; right: 1rem;
-      color: var(--border);
-      font-size: 1.2rem;
-      transition: .2s;
-    }
-    .module-card:hover .mod-arrow { color: var(--accent); }
-
-    /* ── Loading bar ── */
-    .loading-bar {
-      background: rgba(0,212,255,.08);
-      border: 1px solid rgba(0,212,255,.2);
-      color: var(--accent);
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .78rem;
-      padding: .6rem 1rem;
-      margin-bottom: 1.5rem;
-      letter-spacing: .06em;
-      animation: pulse 1.5s infinite;
-    }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
-
-    /* ── Status dot ── */
-    .status-dot {
-      display: inline-block;
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: var(--accent3);
-      margin-right: .4rem;
-      animation: blink 2s infinite;
-    }
-    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
-
-    /* ── Responsive: hide sidenav on mobile ── */
-    @media (max-width: 768px) {
-      .sidenav { width: 60px; }
-      .sidenav a span.label { display: none; }
-      .sidenav .nav-section { display: none; }
-      .main-content { padding: 1rem; }
-      .topbar { padding: .75rem 1rem; }
-      .topbar-right { display: none; }
-      .kpi-value { font-size: 1.3rem; }
-    }
-  </style>
-</head>
-<body>
-
-  <!-- Angular app root -->
-  <app-root></app-root>
-
-  <!-- jQuery (matches professor's template) -->
-  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-
-  <!-- Angular framework bundles (loaded by the build, referenced here for standalone) -->
-  <!-- In a built Angular app these are auto-generated. For GitHub Pages, use the
-       pre-built files in the dist/ folder produced by `ng build`. -->
-
-  <!-- Inline AngularJS (1.x) shim so this works WITHOUT a build step on GitHub Pages -->
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-route.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+  <style>
+    body{margin:0;background:#0a0e1a;color:white;font-family:Arial}
+    nav{background:#111827;padding:20px}
+    nav a{color:#00d4ff;margin-right:20px;text-decoration:none;font-weight:bold}
+    main{padding:30px}
+    table{border-collapse:collapse;width:100%;margin-top:20px}
+    th,td{border:1px solid #334155;padding:8px}
+    th{background:#1e293b;color:#00d4ff}
+    .card{background:#111827;border:1px solid #334155;padding:20px;margin:20px 0}
+  </style>
+</head>
 
-  <script>
-  // ─────────────────────────────────────────────────────────────────────────
-  //  NexaCorp ERP — Angular.js (1.x) PWA
-  //  Uses AngularJS modules, controllers, services, and $routeProvider
-  //  Matches professor's demoDataGetter pattern: Papa.parse + fetchDataAndUpdateChart
-  // ─────────────────────────────────────────────────────────────────────────
+<body>
+  <nav>
+    <a href="#!/">Overview</a>
+    <a href="#!/finance">Finance</a>
+    <a href="#!/sales">Sales</a>
+    <a href="#!/crm">CRM</a>
+    <a href="#!/production">Production</a>
+    <a href="#!/supplychain">Supply Chain</a>
+  </nav>
 
-  Chart.defaults.color = '#64748b';
-  Chart.defaults.borderColor = '#1e2d45';
+  <main>
+    <div ng-view></div>
+  </main>
 
-  const COLORS = {
-    A: 'rgba(0,212,255,1)',   AF: 'rgba(0,212,255,0.15)',
-    G: 'rgba(16,185,129,1)',  GF: 'rgba(16,185,129,0.15)',
-    P: 'rgba(124,58,237,0.85)', PF: 'rgba(124,58,237,0.15)',
-    W: 'rgba(245,158,11,0.85)', WF: 'rgba(245,158,11,0.15)',
-    D: 'rgba(239,68,68,0.85)',  DF: 'rgba(239,68,68,0.15)'
-  };
+<script>
+var app = angular.module("nexaERP", ["ngRoute"]);
 
-  // ── Angular module ──────────────────────────────────────────────────────
-  var app = angular.module('nexaERP', ['ngRoute']);
-
-  // ── $routeProvider — one route per ERP module ───────────────────────────
-  app.config(function($routeProvider) {
-    $routeProvider
-      .when('/',            { template: getPortalTemplate(),     controller: 'PortalCtrl' })
-      .when('/finance',     { template: getFinanceTemplate(),    controller: 'FinanceCtrl' })
-      .when('/sales',       { template: getSalesTemplate(),      controller: 'SalesCtrl' })
-      .when('/crm',         { template: getCrmTemplate(),        controller: 'CrmCtrl' })
-      .when('/production',  { template: getProductionTemplate(), controller: 'ProductionCtrl' })
-      .when('/supplychain', { template: getScTemplate(),         controller: 'SupplyChainCtrl' })
-      .otherwise({ redirectTo: '/' });
-  });
-
-  // ── DataService — Angular service wrapping PapaParse ────────────────────
-  app.service('DataService', function($q) {
-    var base = 'assets/data/';
-
-    // Core fetch method — professor's pattern:
-    //   Papa.parse(url, { download:true, header:true, complete: fn, error: fn })
-    this.fetchCsv = function(filename) {
-      var deferred = $q.defer();
-      Papa.parse(base + filename, {
-        download: true,
-        header: true,
-        complete: function(results) {
-          var rows = results.data.filter(function(r) {
-            return Object.values(r).some(function(v) { return v !== ''; });
-          });
-          deferred.resolve(rows);
-        },
-        error: function(error) {
-          console.error('Error fetching or parsing data:', error);
-          deferred.reject(error);
-        }
-      });
-      return deferred.promise;
-    };
-
-    this.getFinance     = function() { return this.fetchCsv('finance.csv'); };
-    this.getSales       = function() { return this.fetchCsv('sales.csv'); };
-    this.getCrm         = function() { return this.fetchCsv('crm.csv'); };
-    this.getProduction  = function() { return this.fetchCsv('production.csv'); };
-    this.getSupplyChain = function() { return this.fetchCsv('supplychain.csv'); };
-  });
-
-  // ── ChartService — manages Chart.js instances ───────────────────────────
-  app.service('ChartService', function() {
-    var charts = {};
-
-    this.create = function(id, type, labels, datasets, extraOptions) {
-      if (charts[id]) { charts[id].destroy(); }
-      var canvas = document.getElementById(id);
-      if (!canvas) return;
-      charts[id] = new Chart(canvas.getContext('2d'), {
-        type: type,
-        data: { labels: labels, datasets: datasets },
-        options: Object.assign({ responsive: true }, extraOptions || {})
-      });
-    };
-
-    this.destroyAll = function() {
-      Object.keys(charts).forEach(function(id) {
-        if (charts[id]) { charts[id].destroy(); delete charts[id]; }
-      });
-    };
-  });
-
-  // ── Portal Controller ────────────────────────────────────────────────────
-  app.controller('PortalCtrl', function($scope) {
-    $scope.modules = [
-      { icon:'💹', name:'Finance & Accounting', desc:'Revenue, expenses, profit margins and cash flow.', link:'#/finance' },
-      { icon:'📈', name:'Sales',                desc:'Units sold, revenue targets and order value trends.', link:'#/sales' },
-      { icon:'🤝', name:'Customer Relations',   desc:'Customer growth, churn rate and NPS scores.', link:'#/crm' },
-      { icon:'⚙️', name:'Production',           desc:'Units produced, OEE efficiency and defect rates.', link:'#/production' },
-      { icon:'🔗', name:'Supply Chain',         desc:'On-time delivery, lead times and freight costs.', link:'#/supplychain' },
-      { icon:'🔒', name:'HR & Payroll',         desc:'Access restricted. Contact your administrator.', link:null }
-    ];
-  });
-
-  // ── Finance Controller ───────────────────────────────────────────────────
-  app.controller('FinanceCtrl', function($scope, DataService, ChartService) {
-    $scope.loading = true;
-    $scope.kpi = { revenue:'—', profit:'—', margin:'—', cashflow:'—' };
-
-    ChartService.destroyAll();
-
-    DataService.getFinance().then(function(rows) {
-      $scope.loading = false;
-
-      var labels   = rows.map(function(r){ return r.Month; });
-      var revenue  = rows.map(function(r){ return parseFloat(r.Revenue); });
-      var expenses = rows.map(function(r){ return parseFloat(r.Expenses); });
-      var profit   = rows.map(function(r){ return parseFloat(r.NetProfit); });
-      var margin   = rows.map(function(r){ return parseFloat(r.GrossMargin); });
-      var cashflow = rows.map(function(r){ return parseFloat(r.OperatingCashFlow); });
-
-      // KPIs via array mapping
-      var totalRev  = revenue.reduce(function(a,b){return a+b;},0);
-      var totalProf = profit.reduce(function(a,b){return a+b;},0);
-      var avgMargin = (margin.reduce(function(a,b){return a+b;},0)/margin.length).toFixed(1);
-      var avgCF     = cashflow.reduce(function(a,b){return a+b;},0)/cashflow.length;
-
-      $scope.kpi = {
-        revenue:  '$'+(totalRev/1e6).toFixed(1)+'M',
-        profit:   '$'+(totalProf/1e6).toFixed(1)+'M',
-        margin:   avgMargin+'%',
-        cashflow: '$'+(avgCF/1e6).toFixed(2)+'M'
-      };
-
-      // Allow Angular digest before drawing charts
-      setTimeout(function() {
-        // Chart 1: Bar – Revenue vs Expenses
-        ChartService.create('finRevExpChart','bar',labels,[
-          {label:'Revenue',data:revenue,backgroundColor:COLORS.AF,borderColor:COLORS.A,borderWidth:2},
-          {label:'Expenses',data:expenses,backgroundColor:COLORS.DF,borderColor:COLORS.D,borderWidth:2}
-        ],{scales:{y:{ticks:{callback:function(v){return '$'+(v/1e6).toFixed(1)+'M';}}}}});
-
-        // Chart 2: Doughnut – Q4 snapshot
-        var q4r=revenue.slice(-3).reduce(function(a,b){return a+b;},0);
-        var q4e=expenses.slice(-3).reduce(function(a,b){return a+b;},0);
-        var q4p=profit.slice(-3).reduce(function(a,b){return a+b;},0);
-        ChartService.create('finDoughnutChart','doughnut',['Revenue','Expenses','Net Profit'],[
-          {data:[q4r,q4e,q4p],backgroundColor:[COLORS.A,COLORS.D,COLORS.G],borderWidth:0}
-        ],{plugins:{legend:{position:'bottom'}}});
-
-        // Chart 3: Bar – Net Profit
-        ChartService.create('finProfitChart','bar',labels,[
-          {label:'Net Profit',data:profit,backgroundColor:COLORS.GF,borderColor:COLORS.G,borderWidth:2}
-        ],{scales:{y:{ticks:{callback:function(v){return '$'+(v/1e6).toFixed(1)+'M';}}}}});
-
-        // Chart 4: Line – Gross Margin %
-        ChartService.create('finMarginChart','line',labels,[
-          {label:'Gross Margin %',data:margin,borderColor:COLORS.P,backgroundColor:COLORS.PF,fill:true,tension:0.4}
-        ],{scales:{y:{min:30,max:50,ticks:{callback:function(v){return v+'%';}}}}});
-
-        // Chart 5: Line – Cash Flow
-        ChartService.create('finCashFlowChart','line',labels,[
-          {label:'Cash Flow',data:cashflow,borderColor:COLORS.W,backgroundColor:COLORS.WF,fill:true,tension:0.4}
-        ],{scales:{y:{ticks:{callback:function(v){return '$'+(v/1e6).toFixed(1)+'M';}}}}});
-      }, 100);
-    });
-  });
-
-  // ── Sales Controller ─────────────────────────────────────────────────────
-  app.controller('SalesCtrl', function($scope, DataService, ChartService) {
-    $scope.loading = true;
-    $scope.kpi = {units:'—',revenue:'—',newCust:'—',aov:'—'};
-    ChartService.destroyAll();
-
-    DataService.getSales().then(function(rows) {
-      $scope.loading = false;
-      var labels  = rows.map(function(r){return r.Month;});
-      var units   = rows.map(function(r){return parseFloat(r.UnitsSold);});
-      var revenue = rows.map(function(r){return parseFloat(r.SalesRevenue);});
-      var newCust = rows.map(function(r){return parseFloat(r.NewCustomers);});
-      var retRate = rows.map(function(r){return parseFloat(r.ReturnRate);});
-      var aov     = rows.map(function(r){return parseFloat(r.AvgOrderValue);});
-
-      $scope.kpi = {
-        units:   units.reduce(function(a,b){return a+b;},0).toLocaleString(),
-        revenue: '$'+(revenue.reduce(function(a,b){return a+b;},0)/1e6).toFixed(1)+'M',
-        newCust: newCust.reduce(function(a,b){return a+b;},0).toLocaleString(),
-        aov:     '$'+(aov.reduce(function(a,b){return a+b;},0)/aov.length).toFixed(0)
-      };
-
-      setTimeout(function(){
-        ChartService.create('salesRevChart','bar',labels,[
-          {label:'Revenue ($)',data:revenue,backgroundColor:COLORS.AF,borderColor:COLORS.A,borderWidth:2,yAxisID:'y'},
-          {label:'Units Sold',data:units,type:'line',borderColor:COLORS.G,backgroundColor:'transparent',borderWidth:2,tension:0.4,yAxisID:'y1'}
-        ],{scales:{y:{ticks:{callback:function(v){return '$'+(v/1e6).toFixed(1)+'M';}},position:'left'},y1:{position:'right',grid:{drawOnChartArea:false}}}});
-
-        var quarters=[revenue.slice(0,3),revenue.slice(3,6),revenue.slice(6,9),revenue.slice(9,12)]
-          .map(function(q){return q.reduce(function(a,b){return a+b;},0);});
-        ChartService.create('salesQtrChart','pie',['Q1','Q2','Q3','Q4'],[
-          {data:quarters,backgroundColor:[COLORS.A,COLORS.G,COLORS.P,COLORS.W],borderWidth:0}
-        ],{plugins:{legend:{position:'bottom'}}});
-
-        ChartService.create('salesCustChart','bar',labels,[
-          {label:'New Customers',data:newCust,backgroundColor:COLORS.P,borderWidth:0}
-        ]);
-
-        ChartService.create('salesAovChart','line',labels,[
-          {label:'AOV ($)',data:aov,borderColor:COLORS.W,backgroundColor:COLORS.WF,fill:true,tension:0.4}
-        ],{scales:{y:{beginAtZero:false}}});
-
-        ChartService.create('salesReturnChart','line',labels,[
-          {label:'Return Rate %',data:retRate,borderColor:COLORS.D,backgroundColor:COLORS.DF,fill:true,tension:0.4}
-        ],{scales:{y:{min:0,max:5,ticks:{callback:function(v){return v+'%';}}}}});
-      },100);
-    });
-  });
-
-  // ── CRM Controller ───────────────────────────────────────────────────────
-  app.controller('CrmCtrl', function($scope, DataService, ChartService) {
-    $scope.loading = true;
-    $scope.kpi = {total:'—',active:'—',nps:'—',churn:'—'};
-    ChartService.destroyAll();
-
-    DataService.getCrm().then(function(rows) {
-      $scope.loading = false;
-      var labels  = rows.map(function(r){return r.Month;});
-      var total   = rows.map(function(r){return parseFloat(r.TotalCustomers);});
-      var active  = rows.map(function(r){return parseFloat(r.ActiveCustomers);});
-      var churn   = rows.map(function(r){return parseFloat(r.ChurnRate);});
-      var nps     = rows.map(function(r){return parseFloat(r.NPS);});
-      var tickets = rows.map(function(r){return parseFloat(r.TicketsResolved);});
-
-      $scope.kpi = {
-        total:  total[total.length-1].toLocaleString(),
-        active: active[active.length-1].toLocaleString(),
-        nps:    (nps.reduce(function(a,b){return a+b;},0)/nps.length).toFixed(1),
-        churn:  churn[churn.length-1].toFixed(1)+'%'
-      };
-
-      setTimeout(function(){
-        ChartService.create('crmGrowthChart','line',labels,[
-          {label:'Total Customers',data:total,borderColor:COLORS.A,backgroundColor:COLORS.AF,fill:true,tension:0.4},
-          {label:'Active Customers',data:active,borderColor:COLORS.G,backgroundColor:COLORS.GF,fill:true,tension:0.4}
-        ]);
-
-        var lastActive=active[active.length-1],lastTotal=total[total.length-1];
-        var dormant=Math.round((lastTotal-lastActive)*0.6);
-        var atRisk=lastTotal-lastActive-dormant;
-        ChartService.create('crmSegmentChart','doughnut',['Active','Dormant','At-Risk'],[
-          {data:[lastActive,dormant,atRisk],backgroundColor:[COLORS.G,COLORS.W,COLORS.D],borderWidth:0}
-        ],{plugins:{legend:{position:'bottom'}}});
-
-        ChartService.create('crmNpsChart','line',labels,[
-          {label:'NPS',data:nps,borderColor:COLORS.P,backgroundColor:COLORS.PF,fill:true,tension:0.4}
-        ],{scales:{y:{min:35,max:70}}});
-
-        ChartService.create('crmChurnChart','bar',labels,[
-          {label:'Churn Rate %',data:churn,backgroundColor:COLORS.DF,borderColor:COLORS.D,borderWidth:2}
-        ],{scales:{y:{min:0,max:4,ticks:{callback:function(v){return v+'%';}}}}});
-
-        ChartService.create('crmTicketsChart','bar',labels,[
-          {label:'Tickets Resolved',data:tickets,backgroundColor:COLORS.WF,borderColor:COLORS.W,borderWidth:2}
-        ]);
-      },100);
-    });
-  });
-
-  // ── Production Controller ────────────────────────────────────────────────
-  app.controller('ProductionCtrl', function($scope, DataService, ChartService) {
-    $scope.loading = true;
-    $scope.kpi = {units:'—',oee:'—',defect:'—',labor:'—'};
-    ChartService.destroyAll();
-
-    DataService.getProduction().then(function(rows) {
-      $scope.loading = false;
-      var labels = rows.map(function(r){return r.Month;});
-      var units  = rows.map(function(r){return parseFloat(r.UnitsProduced);});
-      var defect = rows.map(function(r){return parseFloat(r.DefectRate);});
-      var oee    = rows.map(function(r){return parseFloat(r.OEE);});
-      var down   = rows.map(function(r){return parseFloat(r.DowntimeHours);});
-      var labor  = rows.map(function(r){return parseFloat(r.LaborCostPerUnit);});
-
-      var avgOEE=(oee.reduce(function(a,b){return a+b;},0)/oee.length).toFixed(1);
-      $scope.kpi = {
-        units:  units.reduce(function(a,b){return a+b;},0).toLocaleString(),
-        oee:    avgOEE+'%',
-        defect: defect[defect.length-1].toFixed(1)+'%',
-        labor:  '$'+labor[labor.length-1].toFixed(2)
-      };
-
-      setTimeout(function(){
-        ChartService.create('prodUnitsChart','bar',labels,[
-          {label:'Units Produced',data:units,backgroundColor:COLORS.AF,borderColor:COLORS.A,borderWidth:2}
-        ]);
-
-        ChartService.create('prodOeeChart','doughnut',['OEE %','Remaining'],[
-          {data:[parseFloat(avgOEE),100-parseFloat(avgOEE)],backgroundColor:[COLORS.G,'#1e2d45'],borderWidth:0,circumference:180,rotation:270}
-        ],{plugins:{legend:{display:false}}});
-
-        ChartService.create('prodDefectChart','line',labels,[
-          {label:'Defect Rate %',data:defect,borderColor:COLORS.D,backgroundColor:COLORS.DF,fill:true,tension:0.4}
-        ],{scales:{y:{min:0,max:4,ticks:{callback:function(v){return v+'%';}}}}});
-
-        ChartService.create('prodDowntimeChart','bar',labels,[
-          {label:'Downtime Hours',data:down,backgroundColor:COLORS.WF,borderColor:COLORS.W,borderWidth:2}
-        ]);
-
-        ChartService.create('prodLaborChart','line',labels,[
-          {label:'Labor Cost/Unit ($)',data:labor,borderColor:COLORS.P,backgroundColor:COLORS.PF,fill:true,tension:0.4}
-        ],{scales:{y:{beginAtZero:false}}});
-      },100);
-    });
-  });
-
-  // ── Supply Chain Controller ──────────────────────────────────────────────
-  app.controller('SupplyChainCtrl', function($scope, DataService, ChartService) {
-    $scope.loading = true;
-    $scope.kpi = {otd:'—',turnover:'—',supplier:'—',lead:'—'};
-    ChartService.destroyAll();
-
-    DataService.getSupplyChain().then(function(rows) {
-      $scope.loading = false;
-      var labels   = rows.map(function(r){return r.Month;});
-      var otd      = rows.map(function(r){return parseFloat(r.OnTimeDelivery);});
-      var turnover = rows.map(function(r){return parseFloat(r.InventoryTurnover);});
-      var supplier = rows.map(function(r){return parseFloat(r.SupplierScore);});
-      var lead     = rows.map(function(r){return parseFloat(r.LeadTimeDays);});
-      var freight  = rows.map(function(r){return parseFloat(r.FreightCost);});
-
-      $scope.kpi = {
-        otd:      otd[otd.length-1].toFixed(1)+'%',
-        turnover: turnover[turnover.length-1].toFixed(1)+'x',
-        supplier: String(supplier[supplier.length-1]),
-        lead:     lead[lead.length-1]+' days'
-      };
-
-      setTimeout(function(){
-        ChartService.create('scOtdChart','line',labels,[
-          {label:'On-Time Delivery %',data:otd,borderColor:COLORS.G,backgroundColor:COLORS.GF,fill:true,tension:0.4,yAxisID:'y'},
-          {label:'Supplier Score',data:supplier,borderColor:COLORS.P,borderDash:[5,5],tension:0.4,yAxisID:'y1'}
-        ],{scales:{y:{min:85,max:100,ticks:{callback:function(v){return v+'%';}},position:'left'},y1:{min:70,max:100,position:'right',grid:{drawOnChartArea:false}}}});
-
-        var janLT=100-(lead[0]-10)*4, decLT=100-(lead[lead.length-1]-10)*4;
-        var janFr=100-((freight[0]-120000)/700), decFr=100-((freight[freight.length-1]-120000)/700);
-        ChartService.create('scRadarChart','radar',['On-Time Delivery','Inv. Turnover','Supplier Score','Lead Time Eff.','Freight Eff.'],[
-          {label:'Jan',data:[otd[0],turnover[0]*10,supplier[0],janLT,janFr],borderColor:COLORS.D,backgroundColor:'rgba(239,68,68,0.1)'},
-          {label:'Dec',data:[otd[otd.length-1],turnover[turnover.length-1]*10,supplier[supplier.length-1],decLT,decFr],borderColor:COLORS.G,backgroundColor:COLORS.GF}
-        ],{scales:{r:{min:0,max:100,ticks:{display:false}}}});
-
-        ChartService.create('scTurnoverChart','bar',labels,[
-          {label:'Inventory Turnover',data:turnover,backgroundColor:COLORS.AF,borderColor:COLORS.A,borderWidth:2}
-        ],{scales:{y:{beginAtZero:false}}});
-
-        ChartService.create('scLeadChart','line',labels,[
-          {label:'Lead Time (days)',data:lead,borderColor:COLORS.W,backgroundColor:COLORS.WF,fill:true,tension:0.4}
-        ],{scales:{y:{beginAtZero:false}}});
-
-        ChartService.create('scFreightChart','bar',labels,[
-          {label:'Freight Cost ($)',data:freight,backgroundColor:COLORS.PF,borderColor:COLORS.P,borderWidth:2}
-        ],{scales:{y:{ticks:{callback:function(v){return '$'+(v/1000).toFixed(0)+'K';}}}}});
-      },100);
-    });
-  });
-
-  // ─────────────────────────────────────────────────────────────────────────
-  //  HTML TEMPLATES (one per ERP module = one component per requirement)
-  // ─────────────────────────────────────────────────────────────────────────
-
-  function getPortalTemplate() {
-    return `
-      <div class="page-header">
-        <div><h1>// ENTERPRISE PORTAL</h1><p>NexaCorp ERP — Angular PWA · Business Intelligence Dashboard · FY 2024</p></div>
-        <span class="page-badge">PORTAL HOME</span>
-      </div>
-      <div class="portal-hero">
-        <h2>Welcome, Analyst</h2>
-        <p>This Angular.js PWA loads all data from CSV files via the DataService (PapaParse).
-        Each module is a separate controller and template — the Angular equivalent of a component.
-        Select a department below to explore live KPIs and Chart.js visualizations.</p>
-      </div>
-      <div class="row">
-        <div class="col-md-4 mb-4" ng-repeat="m in modules">
-          <a ng-href="{{ m.link || '' }}" class="module-card" ng-class="{ locked: !m.link }">
-            <div class="mod-icon">{{ m.icon }}</div>
-            <div class="mod-name">{{ m.name }}</div>
-            <div class="mod-desc">{{ m.desc }}</div>
-            <span class="mod-arrow" ng-if="m.link">→</span>
-          </a>
+app.config(function($routeProvider, $locationProvider) {
+  $locationProvider.hashPrefix("!");
+  $routeProvider
+    .when("/", {
+      template: `
+        <h1>NexaCorp ERP Portal</h1>
+        <div class="card">
+          <h2>AngularJS Progressive Web App</h2>
+          <p>This project uses AngularJS routes and loads data from CSV files.</p>
+          <p>Click a module above to view CSV data.</p>
         </div>
-      </div>`;
-  }
+      `
+    })
+    .when("/finance", {template: moduleTemplate(), controller: function($scope){loadCsv($scope,"Finance","finance.csv");}})
+    .when("/sales", {template: moduleTemplate(), controller: function($scope){loadCsv($scope,"Sales","sales.csv");}})
+    .when("/crm", {template: moduleTemplate(), controller: function($scope){loadCsv($scope,"CRM","crm.csv");}})
+    .when("/production", {template: moduleTemplate(), controller: function($scope){loadCsv($scope,"Production","production.csv");}})
+    .when("/supplychain", {template: moduleTemplate(), controller: function($scope){loadCsv($scope,"Supply Chain","supplychain.csv");}})
+    .otherwise({redirectTo:"/"});
+});
 
-  function getFinanceTemplate() {
-    return `
-      <div class="page-header">
-        <div><h1>// FINANCE & ACCOUNTING</h1><p>Revenue, expenses, profit margins, and cash flow · FY 2024</p></div>
-        <span class="page-badge">FINANCE MODULE</span>
-      </div>
-      <div class="loading-bar" ng-if="loading">⟳ Loading finance.csv via DataService (PapaParse)...</div>
-      <div class="row">
-        <div class="col-md-3"><div class="kpi-card green"><div class="kpi-label">Annual Revenue</div><div class="kpi-value">{{kpi.revenue}}</div><div class="kpi-delta up">↑ +14.3% YoY</div></div></div>
-        <div class="col-md-3"><div class="kpi-card"><div class="kpi-label">Net Profit</div><div class="kpi-value">{{kpi.profit}}</div><div class="kpi-delta up">↑ +18.1% YoY</div></div></div>
-        <div class="col-md-3"><div class="kpi-card purple"><div class="kpi-label">Gross Margin</div><div class="kpi-value">{{kpi.margin}}</div><div class="kpi-delta up">↑ vs last year</div></div></div>
-        <div class="col-md-3"><div class="kpi-card warn"><div class="kpi-label">Avg Cash Flow</div><div class="kpi-value">{{kpi.cashflow}}</div><div class="kpi-delta up">↑ Healthy</div></div></div>
-      </div>
-      <div class="row">
-        <div class="col-md-8"><div class="chart-card"><div class="chart-card-title">Monthly Revenue vs Expenses</div><canvas id="finRevExpChart"></canvas></div></div>
-        <div class="col-md-4"><div class="chart-card"><div class="chart-card-title">Revenue Breakdown Q4</div><canvas id="finDoughnutChart"></canvas></div></div>
-      </div>
-      <div class="row">
-        <div class="col-md-4"><div class="chart-card"><div class="chart-card-title">Net Profit by Month</div><canvas id="finProfitChart"></canvas></div></div>
-        <div class="col-md-4"><div class="chart-card"><div class="chart-card-title">Gross Margin % Trend</div><canvas id="finMarginChart"></canvas></div></div>
-        <div class="col-md-4"><div class="chart-card"><div class="chart-card-title">Operating Cash Flow</div><canvas id="finCashFlowChart"></canvas></div></div>
-      </div>`;
-  }
+function moduleTemplate(){
+  return `
+    <h1>{{title}}</h1>
+    <p>Loading from: <b>assets/data/{{file}}</b></p>
+    <p ng-if="loading">Loading CSV...</p>
+    <p ng-if="error" style="color:#ef4444">{{error}}</p>
 
-  function getSalesTemplate() {
-    return `
-      <div class="page-header">
-        <div><h1>// SALES</h1><p>Units sold, revenue targets, new customers and order value trends · FY 2024</p></div>
-        <span class="page-badge">SALES MODULE</span>
-      </div>
-      <div class="loading-bar" ng-if="loading">⟳ Loading sales.csv via DataService (PapaParse)...</div>
-      <div class="row">
-        <div class="col-md-3"><div class="kpi-card green"><div class="kpi-label">Total Units Sold</div><div class="kpi-value">{{kpi.units}}</div><div class="kpi-delta up">↑ +8.7% YoY</div></div></div>
-        <div class="col-md-3"><div class="kpi-card"><div class="kpi-label">Total Revenue</div><div class="kpi-value">{{kpi.revenue}}</div><div class="kpi-delta up">↑ +14.3% YoY</div></div></div>
-        <div class="col-md-3"><div class="kpi-card purple"><div class="kpi-label">New Customers</div><div class="kpi-value">{{kpi.newCust}}</div><div class="kpi-delta up">↑ Annual total</div></div></div>
-        <div class="col-md-3"><div class="kpi-card warn"><div class="kpi-label">Avg Order Value</div><div class="kpi-value">{{kpi.aov}}</div><div class="kpi-delta down">↓ -1.2% vs target</div></div></div>
-      </div>
-      <div class="row">
-        <div class="col-md-8"><div class="chart-card"><div class="chart-card-title">Revenue vs Units Sold</div><canvas id="salesRevChart"></canvas></div></div>
-        <div class="col-md-4"><div class="chart-card"><div class="chart-card-title">Sales by Quarter</div><canvas id="salesQtrChart"></canvas></div></div>
-      </div>
-      <div class="row">
-        <div class="col-md-4"><div class="chart-card"><div class="chart-card-title">New Customer Acquisition</div><canvas id="salesCustChart"></canvas></div></div>
-        <div class="col-md-4"><div class="chart-card"><div class="chart-card-title">Avg Order Value Trend</div><canvas id="salesAovChart"></canvas></div></div>
-        <div class="col-md-4"><div class="chart-card"><div class="chart-card-title">Return Rate % by Month</div><canvas id="salesReturnChart"></canvas></div></div>
-      </div>`;
-  }
+    <table ng-if="rows.length">
+      <tr>
+        <th ng-repeat="h in headers">{{h}}</th>
+      </tr>
+      <tr ng-repeat="row in rows">
+        <td ng-repeat="h in headers">{{row[h]}}</td>
+      </tr>
+    </table>
+  `;
+}
 
-  function getCrmTemplate() {
-    return `
-      <div class="page-header">
-        <div><h1>// CUSTOMER RELATIONS</h1><p>Customer growth, churn, NPS and support performance · FY 2024</p></div>
-        <span class="page-badge">CRM MODULE</span>
-      </div>
-      <div class="loading-bar" ng-if="loading">⟳ Loading crm.csv via DataService (PapaParse)...</div>
-      <div class="row">
-        <div class="col-md-3"><div class="kpi-card green"><div class="kpi-label">Total Customers</div><div class="kpi-value">{{kpi.total}}</div><div class="kpi-delta up">↑ End of year</div></div></div>
-        <div class="col-md-3"><div class="kpi-card"><div class="kpi-label">Active Customers</div><div class="kpi-value">{{kpi.active}}</div><div class="kpi-delta up">↑ Dec 2024</div></div></div>
-        <div class="col-md-3"><div class="kpi-card purple"><div class="kpi-label">Avg NPS Score</div><div class="kpi-value">{{kpi.nps}}</div><div class="kpi-delta up">↑ +19pts YoY</div></div></div>
-        <div class="col-md-3"><div class="kpi-card warn"><div class="kpi-label">Churn Rate (Dec)</div><div class="kpi-value">{{kpi.churn}}</div><div class="kpi-delta up">↓ Improving</div></div></div>
-      </div>
-      <div class="row">
-        <div class="col-md-8"><div class="chart-card"><div class="chart-card-title">Customer Base Growth</div><canvas id="crmGrowthChart"></canvas></div></div>
-        <div class="col-md-4"><div class="chart-card"><div class="chart-card-title">Segment Mix (Dec)</div><canvas id="crmSegmentChart"></canvas></div></div>
-      </div>
-      <div class="row">
-        <div class="col-md-4"><div class="chart-card"><div class="chart-card-title">NPS Score Trend</div><canvas id="crmNpsChart"></canvas></div></div>
-        <div class="col-md-4"><div class="chart-card"><div class="chart-card-title">Monthly Churn Rate %</div><canvas id="crmChurnChart"></canvas></div></div>
-        <div class="col-md-4"><div class="chart-card"><div class="chart-card-title">Support Tickets Resolved</div><canvas id="crmTicketsChart"></canvas></div></div>
-      </div>`;
-  }
+function loadCsv($scope,title,file){
+  $scope.title = title;
+  $scope.file = file;
+  $scope.loading = true;
+  $scope.error = "";
+  $scope.rows = [];
+  $scope.headers = [];
 
-  function getProductionTemplate() {
-    return `
-      <div class="page-header">
-        <div><h1>// PRODUCTION</h1><p>Units produced, OEE, defect rates, downtime and labor costs · FY 2024</p></div>
-        <span class="page-badge">PRODUCTION MODULE</span>
-      </div>
-      <div class="loading-bar" ng-if="loading">⟳ Loading production.csv via DataService (PapaParse)...</div>
-      <div class="row">
-        <div class="col-md-3"><div class="kpi-card green"><div class="kpi-label">Total Units Produced</div><div class="kpi-value">{{kpi.units}}</div><div class="kpi-delta up">↑ +85.7% YoY</div></div></div>
-        <div class="col-md-3"><div class="kpi-card"><div class="kpi-label">Avg OEE</div><div class="kpi-value">{{kpi.oee}}</div><div class="kpi-delta up">↑ Near world class</div></div></div>
-        <div class="col-md-3"><div class="kpi-card purple"><div class="kpi-label">Defect Rate (Dec)</div><div class="kpi-value">{{kpi.defect}}</div><div class="kpi-delta up">↓ Down from 2.8%</div></div></div>
-        <div class="col-md-3"><div class="kpi-card warn"><div class="kpi-label">Labor Cost/Unit (Dec)</div><div class="kpi-value">{{kpi.labor}}</div><div class="kpi-delta up">↓ -15% vs Jan</div></div></div>
-      </div>
-      <div class="row">
-        <div class="col-md-8"><div class="chart-card"><div class="chart-card-title">Monthly Units Produced</div><canvas id="prodUnitsChart"></canvas></div></div>
-        <div class="col-md-4"><div class="chart-card"><div class="chart-card-title">OEE Gauge (Avg FY2024)</div><canvas id="prodOeeChart"></canvas></div></div>
-      </div>
-      <div class="row">
-        <div class="col-md-4"><div class="chart-card"><div class="chart-card-title">Defect Rate % Trend</div><canvas id="prodDefectChart"></canvas></div></div>
-        <div class="col-md-4"><div class="chart-card"><div class="chart-card-title">Downtime Hours</div><canvas id="prodDowntimeChart"></canvas></div></div>
-        <div class="col-md-4"><div class="chart-card"><div class="chart-card-title">Labor Cost per Unit ($)</div><canvas id="prodLaborChart"></canvas></div></div>
-      </div>`;
-  }
-
-  function getScTemplate() {
-    return `
-      <div class="page-header">
-        <div><h1>// SUPPLY CHAIN</h1><p>On-time delivery, inventory turnover, supplier scores, lead times and freight · FY 2024</p></div>
-        <span class="page-badge">SUPPLY CHAIN MODULE</span>
-      </div>
-      <div class="loading-bar" ng-if="loading">⟳ Loading supplychain.csv via DataService (PapaParse)...</div>
-      <div class="row">
-        <div class="col-md-3"><div class="kpi-card green"><div class="kpi-label">On-Time Delivery (Dec)</div><div class="kpi-value">{{kpi.otd}}</div><div class="kpi-delta up">↑ Up from 88.2%</div></div></div>
-        <div class="col-md-3"><div class="kpi-card"><div class="kpi-label">Inventory Turnover (Dec)</div><div class="kpi-value">{{kpi.turnover}}</div><div class="kpi-delta up">↑ Up from 6.1x</div></div></div>
-        <div class="col-md-3"><div class="kpi-card purple"><div class="kpi-label">Supplier Score (Dec)</div><div class="kpi-value">{{kpi.supplier}}</div><div class="kpi-delta up">↑ Up from 78</div></div></div>
-        <div class="col-md-3"><div class="kpi-card warn"><div class="kpi-label">Lead Time (Dec)</div><div class="kpi-value">{{kpi.lead}}</div><div class="kpi-delta up">↓ Down from 18 days</div></div></div>
-      </div>
-      <div class="row">
-        <div class="col-md-8"><div class="chart-card"><div class="chart-card-title">On-Time Delivery % vs Supplier Score</div><canvas id="scOtdChart"></canvas></div></div>
-        <div class="col-md-4"><div class="chart-card"><div class="chart-card-title">Performance Mix: Jan vs Dec</div><canvas id="scRadarChart"></canvas></div></div>
-      </div>
-      <div class="row">
-        <div class="col-md-4"><div class="chart-card"><div class="chart-card-title">Inventory Turnover Rate</div><canvas id="scTurnoverChart"></canvas></div></div>
-        <div class="col-md-4"><div class="chart-card"><div class="chart-card-title">Lead Time (Days)</div><canvas id="scLeadChart"></canvas></div></div>
-        <div class="col-md-4"><div class="chart-card"><div class="chart-card-title">Monthly Freight Cost ($)</div><canvas id="scFreightChart"></canvas></div></div>
-      </div>`;
-  }
-  </script>
-
-  <!-- PWA Service Worker Registration -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function() {
-        navigator.serviceWorker.register('sw.js')
-          .then(function(reg) { console.log('SW registered:', reg.scope); })
-          .catch(function(err) { console.log('SW registration failed:', err); });
+  Papa.parse("assets/data/" + file, {
+    download:true,
+    header:true,
+    complete:function(results){
+      $scope.$apply(function(){
+        $scope.loading = false;
+        $scope.rows = results.data.filter(function(row){
+          return Object.values(row).some(function(v){return v;});
+        });
+        $scope.headers = $scope.rows.length ? Object.keys($scope.rows[0]) : [];
+        if(!$scope.rows.length){$scope.error = "CSV loaded but has no data.";}
+      });
+    },
+    error:function(){
+      $scope.$apply(function(){
+        $scope.loading = false;
+        $scope.error = "CSV could not load. Check file path/name.";
       });
     }
-  </script>
-
+  });
+}
+</script>
 </body>
 </html>
