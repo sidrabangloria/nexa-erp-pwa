@@ -1,0 +1,4 @@
+CustomerID,Name,Email,Status,LastContact,Value
+C001,Acme Corp,acme@email.com,Active,2024-03-01,52000
+C002,Beta LLC,beta@email.com,Prospect,2024-02-15,18000
+C003,Gamma Inc,gamma@email.com,Active,2024-03-10,34000
