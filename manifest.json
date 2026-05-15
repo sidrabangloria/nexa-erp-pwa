@@ -1,0 +1,32 @@
+{
+  "name": "NexaCorp ERP Portal",
+  "short_name": "NexaERP",
+  "description": "NexaCorp Enterprise Resource Planning Portal — Angular PWA",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0a0e1a",
+  "theme_color": "#00d4ff",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "shortcuts": [
+    { "name": "Finance",     "url": "./index.html#/finance",     "description": "Finance & Accounting" },
+    { "name": "Sales",       "url": "./index.html#/sales",       "description": "Sales Dashboard" },
+    { "name": "CRM",         "url": "./index.html#/crm",         "description": "Customer Relations" },
+    { "name": "Production",  "url": "./index.html#/production",  "description": "Production" },
+    { "name": "Supply Chain","url": "./index.html#/supplychain", "description": "Supply Chain" }
+  ]
+}
