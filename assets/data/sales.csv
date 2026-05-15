@@ -1,0 +1,4 @@
+OrderID,Customer,Product,Quantity,UnitPrice,Total,Date
+1001,Acme Corp,Widget A,50,120,6000,2024-01-15
+1002,Beta LLC,Widget B,30,200,6000,2024-02-10
+1003,Gamma Inc,Widget C,100,85,8500,2024-03-05
