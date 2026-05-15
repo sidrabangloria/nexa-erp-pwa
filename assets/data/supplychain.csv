@@ -1,0 +1,4 @@
+SupplierID,Supplier,Item,OrderQty,LeadDays,Status,FreightCost
+S001,FastParts Co,Raw Material A,5000,7,Delivered,320
+S002,QuickShip Ltd,Raw Material B,2000,14,In Transit,210
+S003,Global Supply,Component X,800,21,Pending,450
