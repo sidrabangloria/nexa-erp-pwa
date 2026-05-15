@@ -1,0 +1,4 @@
+JobID,Product,UnitsPlanned,UnitsProduced,Defects,LaborHours,Efficiency
+J001,Widget A,1000,980,12,240,98%
+J002,Widget B,500,495,5,130,99%
+J003,Widget C,750,710,20,200,94.7%
